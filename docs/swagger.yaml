@@ -1,0 +1,45 @@
+basePath: /
+definitions:
+  main.User:
+    properties:
+      author:
+        type: string
+      id:
+        type: integer
+      title:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: This is a sample server for a Login API.
+  title: Login API
+  version: "1.0"
+paths:
+  /users:
+    get:
+      consumes:
+      - application/json
+      description: Get details of all users
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/main.User'
+            type: array
+      security:
+      - ApiKeyAuth: []
+      summary: Get all users
+      tags:
+      - users
+schemes:
+- http
+securityDefinitions:
+  ApiKeyAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

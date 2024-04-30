@@ -4,9 +4,11 @@ import (
 	"log"
 	"os"
 
+	_ "github.com/PParist/go-login/docs"
 	jwtware "github.com/gofiber/contrib/jwt"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
+	swagger "github.com/gofiber/swagger"
 	"github.com/gofiber/template/html/v2"
 	"github.com/joho/godotenv"
 )
@@ -14,6 +16,15 @@ import (
 var users []User // Slice to store users
 const userContextKey = "user"
 
+// @title Login API
+// @description This is a sample server for a Login API.
+// @version 1.0
+// @host localhost:8080
+// @BasePath /
+// @schemes http
+// @securityDefinitions.apikey ApiKeyAuth
+// @in header
+// @name Authorization
 func main() {
 
 	if err := godotenv.Load(); err != nil {
@@ -30,7 +41,7 @@ func main() {
 		AllowMethods: "GET,POST,HEAD,PUT,DELETE,PATCH",
 		AllowHeaders: "Origin, Content-Type, Accept",
 	}))
-
+	app.Get("/swagger/*", swagger.HandlerDefault)
 	users = append(users, User{ID: 1, Title: "1984", Author: "George Orwell"})
 	users = append(users, User{ID: 2, Title: "The Great Gatsby", Author: "F. Scott Fitzgerald"})
 

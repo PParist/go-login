@@ -9,7 +9,7 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-// Book struct to hold book data
+// User struct to hold book data
 type User struct {
 	ID     int    `json:"id"`
 	Title  string `json:"title"`
@@ -28,6 +28,16 @@ var loginUser = LoginUser{
 	Password: "password123",
 }
 
+// Handler functions
+// getUsers godoc
+// @Summary Get all users
+// @Description Get details of all users
+// @Tags users
+// @Accept  json
+// @Produce  json
+// @Security ApiKeyAuth
+// @Success 200 {array} User
+// @Router /users [get]
 func getUsers(c *fiber.Ctx) error {
 	return c.JSON(users)
 }
