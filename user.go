@@ -6,9 +6,7 @@ import (
 	"time"
 
 	"github.com/gofiber/fiber/v2"
-	_ "github.com/gofiber/jwt/v2"
-	"github.com/golang-jwt/jwt"
-	_ "github.com/golang-jwt/jwt/v4"
+	"github.com/golang-jwt/jwt/v5"
 )
 
 // Book struct to hold book data
@@ -117,26 +115,37 @@ func userLogin(c *fiber.Ctx) error {
 	if _newUser.Email != loginUser.Email || _newUser.Password != loginUser.Password {
 		return fiber.ErrUnauthorized
 	}
-
+	/*//วิธีแรก
 	// Create token
 	token := jwt.New(jwt.SigningMethodHS256)
 
 	// Set claims
 	claims := token.Claims.(jwt.MapClaims)
 	claims["email"] = _newUser.Email
-	claims["rold"] = "admin"
+	claims["role"] = "admin"
 	claims["exp"] = time.Now().Add(time.Hour * 72).Unix()
 
 	// Generate encoded token
 	_token, err := token.SignedString([]byte(os.Getenv("JWT_SECRECT")))
 	if err != nil {
 		return c.SendStatus(fiber.StatusInternalServerError)
+	}*/
+
+	// Create the Claims
+	claims := jwt.MapClaims{
+		"email": _newUser.Email,
+		"role":  "admin",
+		"exp":   time.Now().Add(time.Hour * 72).Unix(),
 	}
 
-	return c.Status(fiber.StatusOK).JSON(fiber.Map{
-		"data":    _newUser,
-		"token":   _token,
-		"resault": "login success",
-	})
+	// Create token
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 
+	// Generate encoded token and send it as response.
+	t, err := token.SignedString([]byte(os.Getenv("JWT_SECRECT")))
+	if err != nil {
+		return c.SendStatus(fiber.StatusInternalServerError)
+	}
+
+	return c.JSON(fiber.Map{"data": _newUser, "token": t, "resault": "login success"})
 }

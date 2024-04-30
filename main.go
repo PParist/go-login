@@ -4,15 +4,15 @@ import (
 	"log"
 	"os"
 
+	jwtware "github.com/gofiber/contrib/jwt"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
-	jwtware "github.com/gofiber/jwt/v2"
 	"github.com/gofiber/template/html/v2"
-	_ "github.com/golang-jwt/jwt/v4"
 	"github.com/joho/godotenv"
 )
 
 var users []User // Slice to store users
+const userContextKey = "user"
 
 func main() {
 
@@ -37,28 +37,31 @@ func main() {
 	// app.Get("/users", func(c *fiber.Ctx) error {
 	// 	return c.JSON(users)
 	// })
+
 	app.Post("/login", userLogin)
 
-	//MiddleWare check role
-	app.Use(restricted)
-
-	// JWT Middleware
+	// JWT Middleware & Middleware check role(restricted)
 	app.Use(jwtware.New(jwtware.Config{
-		SigningKey: []byte(os.Getenv("JWT_SECRECT")),
-	}))
+		SigningKey: jwtware.SigningKey{Key: []byte(os.Getenv("JWT_SECRECT"))},
+	}), validateToken)
+
+	adminGroup := app.Group("/admin")
+	userGroup := app.Group("/user")
+	adminGroup.Use(isAdmin)
+
 	//Set Route
-	app.Get("/users", getUsers)
-	app.Get("/users/:id", getUserById)
+	adminGroup.Get("/users", getUsers)
+	adminGroup.Get("/users/:id", getUserById)
 	//render template
-	app.Get("/template", renderTemplate)
+	userGroup.Get("/template", renderTemplate)
 	//get env
-	app.Get("/env", getENV)
+	adminGroup.Get("/env", getENV)
 
-	app.Post("/createusers", createUser)
-	app.Post("/upload", uploadFile)
+	adminGroup.Post("/createusers", createUser)
+	adminGroup.Post("/upload", uploadFile)
 
-	app.Put("/updateusers/:id", updateUser)
-	app.Delete("/removeuser/:id", removeUserById)
+	adminGroup.Put("/updateusers/:id", updateUser)
+	adminGroup.Delete("/removeuser/:id", removeUserById)
 
 	app.Listen(":8080")
 }
